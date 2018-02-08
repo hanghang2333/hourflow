@@ -1,0 +1,5 @@
+*.tar.gz
+build/*
+*.pyc
+dist/*
+hourflow.egg-info/*
