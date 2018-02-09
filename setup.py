@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
-
+#python setup.py sdist build
+#twine upload dist/*
 from setuptools import setup, find_packages
 
 setup(
     name='hourflow',
-    version=0.1,
+    version=0.2,
     description=(
         'A simple test libiary for deeplearning study'
     ),
