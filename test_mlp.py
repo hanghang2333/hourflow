@@ -32,7 +32,7 @@ sess = Session()
 for step in range(1000):
     J_value = sess.run(J,feed_dict)
     if step%10 == 0:
-        print("Step:",step,"Loss:",J_value.shape)
+        print("Step:",step,"Loss:",J_value)
     sess.run(minimization_op,feed_dict)
 W_value = sess.run(W)
 print("Weight matrix:\n",W_value)
