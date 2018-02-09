@@ -58,7 +58,7 @@ def _negative_gradient(op,grad):
 @RegisterGradient("log")
 def _log_gradient(op,grad):
     x = op.inputs[0]
-    return grad/x
+    return grad/(x)
 @RegisterGradient("multiply")
 def _multiply_gradient(op,grad):
     A = op.inputs[0]
@@ -69,6 +69,11 @@ def _matmul_gradient(op,grad):
     A = op.inputs[0]
     B = op.inputs[1]
     return [grad.dot(B.T),A.T.dot(grad)]
+@RegisterGradient("sigmoid")
+def _sigmoid_gradient(op,grad):
+    sigmoid = op.inputs[0]
+    return sigmoid*(1-sigmoid)*grad
+
 @RegisterGradient("add")
 def _add_gradient(op,grad):
     a = op.inputs[0]
@@ -125,18 +130,8 @@ def _conv2d_gradient(op, grad):
     else:
         PH = (H-1)*S+HH-H
         PW = (W-1)*S+WW-W#当求出来需要pad的数目是奇数时就不好处理，这里选择右边多pad一个
-        if PH%2==0 and PW%2==0:
-            x_pad = np.zeros((N,C,H+PH,W+PW))
-            x_pad[:,:,PH/2:PH/2+H,PW/2:PW/2+W]=x                
-        elif PH%2==0 and PW%2==1:
-            x_pad = np.zeros((N,C,H+PH,W+PW))
-            x_pad[:,:,PH/2:PH/2+H,int(PW/2):int(PW/2)+W]=x
-        elif PH%2==1 and PW%2==0:
-            x_pad = np.zeros((N,C,H+PH,W+PW))
-            x_pad[:,:,int(PH/2):int(PH/2)+H,PW/2:PW/2+W]=x
-        else:
-            x_pad = np.zeros((N,C,H+PH,W+PW))
-            x_pad[:,:,int(PH/2):int(PH/2)+H,int(PW/2):int(PW/2)+W]=x                                
+        x_pad = np.zeros((N,C,H+PH,W+PW))
+        x_pad[:,:,int(PH/2):int(PH/2)+H,int(PW/2):int(PW/2)+W]=x                                               
         Ho,Wo = H,W
     dx, dw, db = np.zeros_like(x), np.zeros_like(w), np.zeros_like(b)
     dx_pad = np.zeros((N,C,H+PH,W+PW))
@@ -179,8 +174,13 @@ def _pooling_gradient(op,grad):
                     poolField = temp_map[batchi,chai,startY:startY + size, startX:startX + size]
                     poolOut = np.max(poolField)
                     index = np.where(poolField==poolOut)
-                    indexx = index[0][0]+startY
-                    indexy = index[1][0]+startX
+                    #print(index)
+                    try:
+                        indexx = index[0][0]+startY
+                        indexy = index[1][0]+startX
+                    except Exception:
+                        indexx = startY
+                        indexy = startX
                     #print('ss',grad.shape,batchi,chai,out_row,out_col)
                     out[batchi,chai,indexx,indexy] = grad[batchi][chai][r_idx][c_idx]
     return  out

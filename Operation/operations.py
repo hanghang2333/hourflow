@@ -26,7 +26,8 @@ class softmax(Operation):
         super().__init__([a])
     
     def compute(self,a_value):
-        return np.exp(a_value)/np.sum(np.exp(a_value),axis=1)[:,None]
+        #print('softmax',a_value)
+        return np.exp(a_value)/(np.sum(np.exp(a_value),axis=1)[:,None])
 
 class log(Operation):
     def __init__(self,a):
@@ -65,7 +66,7 @@ class flatten(Operation):
         return np.reshape(x_value,[x_value.shape[0],-1]) 
 
 class conv2d(Operation):
-    def __init__(self,x,w,b, strides=1, pad='valid'):
+    def __init__(self,x,w,b, strides=1, pad='same'):
         #    H' = 1 + (H + 2 * pad - HH) / stride
         #    W' = 1 + (W + 2 * pad - WW) / stride  
         super().__init__([x,w,b])
